@@ -1,0 +1,26 @@
+﻿body
+{
+}
+
+
+form {
+	margin-top:50px;
+	width:500px;
+	margin-left:33%;
+	border:solid;
+	border-radius:3px;
+	background:lightgrey;
+	padding-bottom:5px;
+	padding-top:5px;
+}
+
+#buttons {
+	margin:0 auto;
+	margin-top:5px;
+	margin-bottom:5px;
+	width:50%;
+
+}
+form #buttons input{
+	margin-bottom:10px;
+}

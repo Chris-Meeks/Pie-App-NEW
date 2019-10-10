@@ -1,0 +1,293 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+	    <title></title>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='/static/pie.css') }}">
+</head>
+<style>
+body{
+	color:blue;
+	 background-color: #6b5b95
+}
+canvas{
+	
+	background-color: #e7e7e7;
+	
+}
+#chart{
+	margin-left:300px;
+	width:800px;
+	border: 5px solid  #878f99;
+	background-color: #e7e7e7;
+	border-radius:8px;
+	padding:5px;
+}
+#title-area{
+	height:50px;
+
+}
+button{
+	border-radius:8px;
+	border:none;
+	padding:10px 24px;
+	margin-left:10px;
+	background-color: #008CBA;
+	color:white;
+	font-size:14px;
+	text-decoration:none;
+
+}
+
+
+</style>
+<body>
+
+<div id="title-area">
+
+</div>
+
+	<div id="chart">
+		<div>
+		<canvas width="800" height="500"></canvas>
+		</div>
+			<div id="year" style="font-size:24px;margin-left:200px;padding:8px;">
+	
+			</div>
+			<div id="data" style="font-size:24px;margin-left:200px;">
+			</div>
+			
+			<button type="button" id="prevbtn">Prev</button>
+			<button type="button" id="nextbtn">Next</button>
+			<button type="button" id="move">Animate Next</button>
+
+	</div>
+</body>
+<script>
+
+
+
+const JSONresults = JSON.parse('{{ a | tojson | safe}}');
+
+
+class PieChart{
+	
+	constructor(results,increments){
+		
+		this.results = results
+		this.increments = increments
+		
+		
+		
+		
+		
+	}
+
+
+	drawPie(){
+	
+	
+	
+
+		for(let i = 0;i<this.results.data.length;i++){
+			this.results.data[i].count += this.increments[i]*0.01;				
+			if(this.results.data[i].count<0){this.results.data[i].count=0}
+		}
+		
+			
+	
+		var total = this.results.data.reduce((sum,{count})=>sum+count,0)
+		
+		let cx = document.querySelector("canvas").getContext("2d");
+		
+		
+
+		
+		
+		let currentAngle = -0.5 * Math.PI;
+					for(let result of this.results.data){
+						let sliceAngle = (result.count/total)*2*Math.PI;
+						
+						
+						cx.beginPath();
+						cx.arc(250,250,200,currentAngle,currentAngle+sliceAngle)
+						currentAngle+=sliceAngle;
+						cx.lineTo(250,250)
+						cx.fillStyle =result.color
+						document.getElementById("year").innerHTML="Year: "+this.results.year
+						
+
+
+
+						cx.fill();
+					}
+					
+					cx.fillStyle="#e7e7e7"
+					cx.fillRect(500,100,500,500)
+					let start = 100;
+							for(let result of this.results.data.slice(0,10)){
+								cx.font= "14px Georgia";
+								cx.fillStyle=result.color
+								cx.fillText(result.name+" "+(result.count/total*100).toFixed(1)+"%",500,start+=28)
+							}
+					
+					
+					}}
+					
+					
+					
+
+	
+
+class Controller{
+				constructor(yourdata){
+				this.JSON = yourdata
+				this.animateJSON = [1]
+				this.year = 0
+				this.show = this.show.bind(this)
+				this.animate = this.animate.bind(this)
+				this.up = this.up.bind(this)
+				this.down = this.down.bind(this)
+				this.nextbtn = document.querySelector("#nextbtn")
+				this.move= document.querySelector("#move")
+				this.makedata = this.makedata.bind(this)
+				this.controlanimation = this.controlanimation.bind(this)
+				this.iterations = 0
+				this.makeIncrementList = this.makeIncrementList.bind(this)
+				this.incrementer = []
+				
+				
+				}
+
+			show(){
+			let p = new PieChart(this.animateJSON[this.year],this.incrementer[this.year],0)
+			p.drawPie()
+			
+			}
+
+			up(){
+				this.iterations = 0
+				this.makedata()
+				if(this.year<this.JSON.length-1){
+				this.year++
+				this.show()}
+				console.log(this.JSON[0].data[0].count)
+				console.log(this.animateJSON[0].data[0].count)
+				
+
+			}
+
+			down(){
+				this.iterations = 0
+				
+				this.makedata()
+				if(this.year>0){
+				this.year--
+				this.show()}else{this.show()}
+				console.log(this.JSON[0].data[0].count)
+				console.log(JSONresults[0].data[0].count)
+
+			}
+
+
+			next(){nextbtn.addEventListener("click",this.up,false)
+			}
+
+			prev(){prevbtn.addEventListener("click",this.down,false)}
+
+			animatelistener(){move.addEventListener("click",this.controlanimation,false)}
+
+			
+			showdata(){
+				
+				console.log(this.JSON[this.year])
+				for(let result of this.JSON[this.year].data){
+					result.count=result.count+5
+					console.log(result.count)
+				}
+			}
+
+			controlanimation(){
+			if(this.year<this.JSON.length-1){
+			var t = this
+			console.log("CONTROLANIMATION");
+				let timer = setInterval(function(){if(t.iterations<101){t.animate(); t.iterations++}else{t.up();clearInterval(timer)}},20)
+			}}
+
+			animate(){
+				console.log("ANIMATE")
+				
+				let n = new PieChart(this.animateJSON[this.year],this.incrementer[this.year])
+				n.drawPie()
+			}
+
+			makedata(){
+				this.animateJSON = JSON.parse(JSON.stringify(this.JSON))
+				
+			}
+
+			makeIncrementList(){
+					for(let i = 0;i<this.animateJSON.length-1;i++){
+							let current = this.animateJSON[i].data.map(feedback => feedback.count);
+							let next = this.animateJSON[i+1].data.map(feedback => feedback.count);
+
+							function getIncrement(){var increment = [];
+													for(let i = 0;i<current.length;i++){
+													increment.push(next[i]-current[i])	
+													}
+													return increment;
+
+													}
+		
+
+					let increment = getIncrement()
+					this.incrementer.push(increment)
+					
+					
+					}
+					let lastincs = []
+					for(let p =0;p<this.animateJSON[this.year].data.length;p++){
+						lastincs.push(0)
+					
+					}this.incrementer.push(lastincs)
+					console.log(lastincs)
+					console.log(this.incrementer)
+			}
+
+			
+			
+			
+
+
+}
+			
+			
+controller = new Controller(JSONresults)
+controller.makedata()
+controller.makeIncrementList()
+//contoller.showdata()
+controller.show()
+controller.animatelistener()
+controller.next()
+controller.prev()
+
+//controller.showdata()
+
+
+
+
+
+					
+			
+
+
+
+
+
+
+
+
+</script>
+</html>

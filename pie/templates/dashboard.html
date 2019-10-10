@@ -1,0 +1,57 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('static', filename='dashboard.css')}}">
+{% endblock %}
+
+{% block content %}
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Pie APP</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Dashboard</a></li>
+           
+			<li><a href="{{ url_for('api.uploadform') }}">Upload Data</a></li>
+            <li><a href="{{ url_for('api.logout') }}">Log Out</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </nav>
+
+   
+          <h1 class="page-header">Welcome, {{ name }}</h1>
+
+
+<form action="{{url_for("api.dashboard")}}" method="POST" class="options" style="margin:10px 200px; width:800px">
+		{{ pieform.csrf_token }}
+		
+		{{ pieform.options(class_="form-control") }}
+		
+		<ul>
+		{% for error in pieform.options.errors %}
+		<li> {{error}}</li>
+		{% endfor %}
+		</ul>
+		<input type = "submit">
+
+	</form>
+
+        
+{% endblock %}
